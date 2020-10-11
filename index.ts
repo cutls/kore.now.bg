@@ -317,7 +317,7 @@ router.get('/get', async (ctx, next) => {
 		await pool.query(sql)
 		ctx.body = { success: true, token: token, data: data }
 	} catch (error) {
-		ctx.body = { success: false, error: 'cannot process' }
+		ctx.body = error
 	}
 })
 router.get('/get_readonly', async (ctx, next) => {
