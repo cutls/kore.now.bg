@@ -307,14 +307,16 @@ router.post('/post', async (ctx, next) => {
 router.get('/get', async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', '*');
     try {
-        const get = my(`${config.DB_TABLE}_login`).select(['LINEID', 'USERNAME']).where('TOKEN', ctx.query.i).toString();
+        const get = my(`${config.DB_TABLE}_login`).select(['LINEID']).where('TOKEN', ctx.query.i).toString();
         const results = (await pool.query(get));
         if (!results[0]) {
             ctx.body = { success: false, error: 'cannot login' };
             return false;
         }
         const userId = results[0]['LINEID'];
-        const username = results[0]['USERNAME'];
+        const getUsername = my(`${config.DB_TABLE}_user`).select('USERNAME').where('LINEID', userId).toString();
+        const getUsernameE = (await pool.query(getUsername));
+        const username = getUsernameE[0]['USERNAME'];
         if (username != ctx.query.user) {
             ctx.body = { success: false, error: 'this is not you', needed: true };
             return false;
@@ -340,7 +342,7 @@ router.get('/get', async (ctx, next) => {
         ctx.body = { success: true, token: token, data: data };
     }
     catch (error) {
-        ctx.body = error;
+        ctx.body = { success: false, error: 'cannot process' };
     }
 });
 router.get('/get_readonly', async (ctx, next) => {
