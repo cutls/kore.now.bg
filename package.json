@@ -4,7 +4,8 @@
   "description": "kore.now's backend",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js"
   },
   "author": "cutls <web-pro@cutls.com>",
   "license": "UNLICENSED",
