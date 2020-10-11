@@ -203,13 +203,14 @@ router.get('/verify_credentials', async (ctx, next) => {
             return false;
         }
         const userId = results[0]['LINEID'];
-        const regGet = my(`${config.DB_TABLE}_user`).select('NOTIFY').where('LINEID', userId).toString();
+        const regGet = my(`${config.DB_TABLE}_user`).select(['USERNAME', 'NOTIFY']).where('LINEID', userId).toString();
         const regCk = (await pool.query(regGet));
         if (!regCk[0]) {
             ctx.body = { success: false, error: 'cannot login' };
             return false;
         }
         const notify = regCk[0]['NOTIFY'];
+        const username = regCk[0]['USERNAME'];
         let isNotice = false;
         if (notify && notify != '')
             isNotice = true;
@@ -229,7 +230,7 @@ router.get('/verify_credentials', async (ctx, next) => {
         })
             .toString();
         await pool.query(sql);
-        ctx.body = { success: true, token: token, notify: isNotice, has_waiter: hasWaiter, code: code };
+        ctx.body = { success: true, token: token, notify: isNotice, has_waiter: hasWaiter, code: code, username: username };
     }
     catch (error) {
         ctx.body = { success: false, error: 'cannot login' };
