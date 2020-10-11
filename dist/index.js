@@ -283,6 +283,13 @@ router.post('/post', async (ctx, next) => {
         return false;
     }
     const userId = results[0]['LINEID'];
+    const getUsername = my(`${config.DB_TABLE}_user`).select(['USERNAME']).where('LINEID', userId).toString();
+    const usernameResults = (await pool.query(getUsername));
+    if (!usernameResults[0]) {
+        ctx.body = { success: false, error: 'cannot find the user' };
+        return false;
+    }
+    const username = usernameResults[0]['USERNAME'];
     const sql = my(`${config.DB_TABLE}_link`)
         .insert({
         LINEID: userId,
@@ -291,7 +298,7 @@ router.post('/post', async (ctx, next) => {
         .toString();
     try {
         const tryIns = (await pool.query(sql));
-        ctx.body = { success: true };
+        ctx.body = { success: true, your_link: `https://${config.FRONTEND}/${username}` };
     }
     catch (error) {
         ctx.body = { success: false, error: `cannot process` };
