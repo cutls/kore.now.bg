@@ -322,7 +322,7 @@ router.get('/get', async (ctx, next) => {
             ctx.body = { success: false, error: 'this is not you', needed: true };
             return false;
         }
-        const regGet = my(`${config.DB_TABLE}_link`).select('LINK').where('LINEID', userId).toString();
+        const regGet = my(`${config.DB_TABLE}_link`).select(['ID', 'LINK']).where('LINEID', userId).toString();
         const regCk = (await pool.query(regGet));
         if (!regCk[0]) {
             ctx.body = { success: false, error: 'cannot login' };
@@ -330,7 +330,7 @@ router.get('/get', async (ctx, next) => {
         }
         let data = [];
         for (let raw of regCk) {
-            data.push(raw['LINK']);
+            data.push({ id: raw['ID'], text: raw['LINK'] });
         }
         const token = utils_1.genToken();
         const sql = my(`${config.DB_TABLE}_login`)
@@ -363,7 +363,7 @@ router.get('/get_readonly', async (ctx, next) => {
         }
         const delCode = my(`${config.DB_TABLE}_wait`).where('CODE', ctx.query.i).delete().toString();
         await pool.query(delCode);
-        const regGet = my(`${config.DB_TABLE}_link`).select('LINK').where('LINEID', userId).toString();
+        const regGet = my(`${config.DB_TABLE}_link`).select(['ID', 'LINK']).where('LINEID', userId).toString();
         const regCk = (await pool.query(regGet));
         if (!regCk[0]) {
             ctx.body = { success: false, error: 'cannot find the username' };
@@ -371,7 +371,7 @@ router.get('/get_readonly', async (ctx, next) => {
         }
         let data = [];
         for (let raw of regCk) {
-            data.push(raw['LINK']);
+            data.push({ id: raw['ID'], text: raw['LINK'] });
         }
         const token = utils_1.genToken();
         const sql = my(`${config.DB_TABLE}_wait`).where('CODE', ctx.query.i).delete().toString();
@@ -460,6 +460,26 @@ router.get('/action/:action', async (ctx, next) => {
     const sql = my(`${config.DB_TABLE}_wait`).where('CODE', ctx.query.code).where('LINEID', userId).update({ VERIFIED: verified }).toString();
     const aResult = (await pool.query(sql));
     ctx.body = { success: true, action: action };
+});
+router.get('/delete', async (ctx, next) => {
+    ctx.set('Access-Control-Allow-Origin', '*');
+    const id = ctx.query.id;
+    const get = my(`${config.DB_TABLE}_login`).select('LINEID').where('TOKEN', ctx.query.i).toString();
+    const results = (await pool.query(get));
+    if (!results[0]) {
+        ctx.body = { success: false, error: 'cannot login' };
+        return false;
+    }
+    const userId = results[0]['LINEID'];
+    const getId = my(`${config.DB_TABLE}_link`).select('LINEID').where('ID', id).where('LINEID', userId).toString();
+    const resultsId = (await pool.query(getId));
+    if (!resultsId[0]) {
+        ctx.body = { success: false, error: 'cannot delete' };
+        return false;
+    }
+    const sql = my(`${config.DB_TABLE}_link`).where('ID', id).delete().toString();
+    const aResult = (await pool.query(sql));
+    ctx.body = { success: true };
 });
 koa.use(cors_1.default());
 koa.use(koa_body_1.default());
