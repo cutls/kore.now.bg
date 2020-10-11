@@ -340,7 +340,7 @@ router.get('/get', async (ctx, next) => {
         ctx.body = { success: true, token: token, data: data };
     }
     catch (error) {
-        ctx.body = { success: false, error: 'cannot process' };
+        ctx.body = error;
     }
 });
 router.get('/get_readonly', async (ctx, next) => {
