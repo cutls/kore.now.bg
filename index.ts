@@ -435,7 +435,7 @@ koa.use(koaBody())
 koa.use(router.routes())
 koa.use(router.allowedMethods())
 
-koa.listen(8000, () => {
+koa.listen(process.env.PORT || 8000, () => {
 	console.log('Server started!!')
 })
 async function isOpen(q: string) {

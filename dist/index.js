@@ -462,7 +462,7 @@ koa.use(cors_1.default());
 koa.use(koa_body_1.default());
 koa.use(router.routes());
 koa.use(router.allowedMethods());
-koa.listen(8000, () => {
+koa.listen(process.env.PORT || 8000, () => {
     console.log('Server started!!');
 });
 async function isOpen(q) {
